@@ -1,5 +1,5 @@
 // Puzzle.java
-// Lógica del juego 8-Puzzle en modo manual
+// Lógica del juego 8-Puzzle en modo gráfico
 // Proyecto por v1000
 
 import java.util.*;
@@ -55,72 +55,34 @@ public class Puzzle {
                 }
             }
         }
-        mostrarTablero();
     }
 
-    public void jugarConUsuario(Scanner scanner) {
-        String input;
-        MoveSuggester sugeridor = new MoveSuggester();
+    public void generarTableroAleatorio(int nivelDificultad) {
+        int movimientos;
+        switch (nivelDificultad) {
+            case 1:  movimientos = 10; break;  // Fácil
+            case 2:  movimientos = 30; break;  // Medio
+            case 3:  movimientos = 100; break; // Difícil
+            default: movimientos = 30;
+        }
 
-        do {
-            System.out.print("Mover ficha (arriba, abajo, izquierda, derecha, sugerencia, resolver o salir): ");
-            input = scanner.nextLine().toLowerCase();
-
-            switch (input) {
-                case "sugerencia":
-                    String sugerido = sugeridor.sugerirMovimiento(getTablero());
-                    if (sugerido != null) {
-                        System.out.println("➡️  Sugerencia: mueve " + sugerido);
-                    } else {
-                        System.out.println("No se puede sugerir un movimiento.");
-                    }
-                    break;
-
-                case "resolver":
-                    PuzzleSolver solver = new PuzzleSolver();
-                    solver.setEstadoInicial(getTablero());
-                    solver.setEstadoMeta(generarMeta());
-
-                    // GUI animada (desde consola)
-                    javax.swing.SwingUtilities.invokeLater(() -> {
-                        PuzzleGUI panel = new PuzzleGUI(this);
-                        javax.swing.JFrame ventana = new javax.swing.JFrame("Resolviendo...");
-                        ventana.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
-                        ventana.setResizable(false);
-                        ventana.add(panel);
-                        ventana.pack();
-                        ventana.setLocationRelativeTo(null);
-                        ventana.setVisible(true);
-                        solver.resolverAutomaticamente(this, panel); // animación
-                    });
-                    return; // Salir del bucle para evitar múltiples ejecuciones
-
-                case "arriba":
-                case "abajo":
-                case "izquierda":
-                case "derecha":
-                    if (mover(input)) {
-                        mostrarTablero();
-                        if (esMeta()) {
-                            System.out.println("🎉 ¡Felicidades, resolviste el puzzle!");
-                            System.out.print("Introduce tu alias: ");
-                            String alias = scanner.nextLine();
-                            ScoreManager scoreManager = new ScoreManager("data/scores.txt");
-                            scoreManager.registrarPuntuacion(alias, 100);
-                            return;
-                        }
-                    } else {
-                        System.out.println("Movimiento inválido.");
-                    }
-                    break;
-
-                case "salir":
-                    break;
-
-                default:
-                    System.out.println("Comando no reconocido.");
+        // Generamos estado meta y lo vamos desordenando
+        int[][] meta = generarMeta();
+        for (int i = 0; i < TAM; i++) {
+            tablero[i] = Arrays.copyOf(meta[i], TAM);
+            for (int j = 0; j < TAM; j++) {
+                if (tablero[i][j] == 0) {
+                    filaVacia = i;
+                    colVacia = j;
+                }
             }
-        } while (!input.equals("salir"));
+        }
+
+        Random rand = new Random();
+        String[] direcciones = {"arriba", "abajo", "izquierda", "derecha"};
+        for (int i = 0; i < movimientos; i++) {
+            mover(direcciones[rand.nextInt(direcciones.length)]);
+        }
     }
 
     public boolean mover(String direccion) {
@@ -147,22 +109,6 @@ public class Puzzle {
 
     private boolean esPosicionValida(int fila, int col) {
         return fila >= 0 && fila < TAM && col >= 0 && col < TAM;
-    }
-
-    public void mostrarTablero() {
-        System.out.println("-------------");
-        for (int i = 0; i < TAM; i++) {
-            for (int j = 0; j < TAM; j++) {
-                System.out.print("| ");
-                if (tablero[i][j] == 0) {
-                    System.out.print("  ");
-                } else {
-                    System.out.print(tablero[i][j] + " ");
-                }
-            }
-            System.out.println("|");
-        }
-        System.out.println("-------------");
     }
 
     public boolean esMeta() {

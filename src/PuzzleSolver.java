@@ -89,29 +89,37 @@ public class PuzzleSolver {
         JOptionPane.showMessageDialog(panel, "No se encontró solución.");
     }
 
-    private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
-        List<Nodo> camino = new ArrayList<>();
-        while (nodo != null) {
-            camino.add(nodo);
-            nodo = nodo.padre;
-        }
-        Collections.reverse(camino);
+private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
+    List<Nodo> camino = new ArrayList<>();
+    while (nodo != null) {
+        camino.add(nodo);
+        nodo = nodo.padre;
+    }
+    Collections.reverse(camino);
 
-        Timer timer = new Timer(500, new AbstractAction() {
-            int i = 0;
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (i < camino.size()) {
-                    puzzle.setTablero(camino.get(i++).estado);
-                    panel.repaint();
-                } else {
-                    ((Timer) e.getSource()).stop();
-                    JOptionPane.showMessageDialog(panel, "Puzzle resuelto automáticamente.");
+    Timer timer = new Timer(500, new AbstractAction() {
+        int i = 0;
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (i < camino.size()) {
+                puzzle.setTablero(camino.get(i++).estado);
+                panel.repaint();
+            } else {
+                ((Timer) e.getSource()).stop();
+                JOptionPane.showMessageDialog(panel, "🎉 Puzzle resuelto automáticamente.");
+
+                // Pedir alias y guardar puntuación
+                String alias = JOptionPane.showInputDialog(panel, "Introduce tu alias:");
+                if (alias != null && !alias.trim().isEmpty()) {
+                    ScoreManager scoreManager = new ScoreManager("data/scores.txt");
+                    scoreManager.registrarPuntuacion(alias.trim(), 50); // Puntaje para resolución automática
                 }
             }
-        });
-        timer.start();
-    }
+        }
+    });
+    timer.start();
+}
+
 
     private void mostrarSolucion(Nodo nodo) {
         List<Nodo> camino = new ArrayList<>();

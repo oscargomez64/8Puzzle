@@ -40,6 +40,7 @@ public class PuzzleGUI extends JPanel {
             solver.resolverAutomaticamente(puzzle, this); // ✅ pasamos Puzzle y JPanel
         });
         this.add(btnResolver);
+        
 
         // Clic para mover fichas
         addMouseListener(new MouseAdapter() {
@@ -53,6 +54,19 @@ public class PuzzleGUI extends JPanel {
 
                     if (puzzle.esMeta()) {
                         JOptionPane.showMessageDialog(null, "🎉 ¡Felicidades! Has resuelto el puzzle.");
+
+                        String alias = JOptionPane.showInputDialog(null, "Introduce tu nombre o alias:");
+                        if (alias != null && !alias.trim().isEmpty()) {
+                            int puntos = 100;
+
+                            // Asegura que el directorio exista
+                            new java.io.File("data").mkdirs();
+
+                            ScoreManager scoreManager = new ScoreManager("data/scores.txt");
+                            scoreManager.registrarPuntuacion(alias.trim(), puntos);
+
+                            JOptionPane.showMessageDialog(null, "✅ Puntuación guardada.");
+                        }
                     }
                 }
             }

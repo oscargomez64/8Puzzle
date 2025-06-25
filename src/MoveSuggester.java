@@ -7,7 +7,6 @@ import java.util.*;
 public class MoveSuggester {
     private final int TAM = 3;
 
-    // Estado meta por defecto
     private final int[][] objetivo = {
         {1, 2, 3},
         {4, 5, 6},
@@ -24,7 +23,7 @@ public class MoveSuggester {
             Nodo actual = abierta.poll();
 
             if (Arrays.deepEquals(actual.estado, objetivo)) {
-                return reconstruirPrimerMovimiento(actual);
+                return reconstruirMovimientoDetallado(actual);
             }
 
             String clave = Arrays.deepToString(actual.estado);
@@ -39,15 +38,29 @@ public class MoveSuggester {
             }
         }
 
-        return null; // no hay solución
+        return null;
     }
 
-    private String reconstruirPrimerMovimiento(Nodo nodo) {
-        while (nodo.padre != null && nodo.padre.padre != null) {
-            nodo = nodo.padre;
-        }
-        return nodo.movimiento;
+  private String reconstruirMovimientoDetallado(Nodo nodo) {
+    while (nodo.padre != null && nodo.padre.padre != null) {
+        nodo = nodo.padre;
     }
+
+    int[][] antes = nodo.padre.estado;
+    int[][] despues = nodo.estado;
+
+    for (int i = 0; i < TAM; i++) {
+        for (int j = 0; j < TAM; j++) {
+            if (antes[i][j] != despues[i][j] && despues[i][j] == 0) {
+                int numero = antes[i][j];
+                return numero + " hacia " + nodo.movimiento;
+            }
+        }
+    }
+
+    return nodo.movimiento; // fallback
+}
+
 
     private List<Nodo> generarSucesores(Nodo nodo) {
         List<Nodo> sucesores = new ArrayList<>();
@@ -56,10 +69,10 @@ public class MoveSuggester {
         int fila = vacia[0], col = vacia[1];
 
         int[][] movimientos = {
-            {-1, 0, 'b'}, // arriba
-            {1, 0, 'a'},  // abajo
-            {0, -1, 'd'}, // izquierda
-            {0, 1, 'i'}   // derecha
+            {-1, 0}, // arriba
+            {1, 0},  // abajo
+            {0, -1}, // izquierda
+            {0, 1}   // derecha
         };
 
         for (int[] mov : movimientos) {
@@ -81,10 +94,10 @@ public class MoveSuggester {
     }
 
     private String direccionTexto(int df, int dc) {
-        if (df == -1 && dc == 0) return "arriba";
-        if (df == 1 && dc == 0) return "abajo";
-        if (df == 0 && dc == -1) return "izquierda";
-        if (df == 0 && dc == 1) return "derecha";
+        if (df == -1 && dc == 0) return "abajo";
+        if (df == 1 && dc == 0) return "arriba";
+        if (df == 0 && dc == -1) return "derecha";
+        if (df == 0 && dc == 1) return "izquierda";
         return "";
     }
 
