@@ -57,7 +57,7 @@ PERSONA8/
  INSTRUCCIONES DE COMPILACIÓN
 ===============================
 
-1. Asegúrate de tener Java instalado (JDK 8 o superior).
+1. Asegúrate de tener Java instalado (JDK 17 o superior).
 2. Abre una terminal y compila el proyecto:
 
    > javac -d bin src/*.java
