@@ -1,6 +1,6 @@
 PROYECTO FINAL – 8-PUZZLE
 Lenguaje: Java
-Desarrollado por: v1000
+Desarrollado por: Oscar Gomez y Uriel Ortiz
 
 ===============================
  DESCRIPCIÓN GENERAL
@@ -19,16 +19,6 @@ Modos de juego disponibles:
    - El usuario ingresa el estado inicial y el estado meta.
    - Usa el algoritmo A* para resolver el puzzle.
    - Muestra paso a paso la solución mediante animación.
-
-3. MODO MANUAL (Terminal)
-   - El jugador mueve fichas escribiendo comandos (`arriba`, `abajo`, etc.).
-   - El tablero se muestra en consola.
-   - Soporte para movimientos válidos y finalización cuando se resuelve.
-
-4. MODO INTELIGENTE (Terminal)
-   - Entrada del estado inicial y meta por consola.
-   - El sistema resuelve el puzzle con A* y muestra los pasos por texto.
-
 
 ===============================
  CARACTERÍSTICAS TÉCNICAS

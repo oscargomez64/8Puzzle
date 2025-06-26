@@ -1,6 +1,6 @@
 // PuzzleSolver.java
-// Modo inteligente del juego 8-Puzzle con A*
-// Proyecto por v1000
+// Implementación del modo inteligente del juego 8-Puzzle utilizando el algoritmo A*
+// Proyecto desarrollado por Oscar Gomez y Uriel Ortiz
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -8,11 +8,12 @@ import java.util.*;
 import javax.swing.Timer;
 
 public class PuzzleSolver {
-    private final int TAM = 3;
+    private final int TAM = 3; // Dimensión del tablero (3x3)
 
-    private int[][] estadoInicial;
-    private int[][] estadoMeta;
+    private int[][] estadoInicial; // Estado inicial del tablero
+    private int[][] estadoMeta;    // Estado objetivo o meta
 
+    // Configura los estados inicial y meta a través de la entrada del usuario
     public void configurar(Scanner scanner) {
         System.out.println("Introduce el estado inicial (9 números del 0 al 8 separados por espacio):");
         estadoInicial = leerEstadoDesdeUsuario(scanner);
@@ -21,6 +22,7 @@ public class PuzzleSolver {
         estadoMeta = leerEstadoDesdeUsuario(scanner);
     }
 
+    // Ejecuta el algoritmo A* y muestra la solución en consola
     public void resolverPuzzle() {
         Nodo inicio = new Nodo(estadoInicial, null, 0, calcularHeuristica(estadoInicial));
         PriorityQueue<Nodo> abierta = new PriorityQueue<>(Comparator.comparingInt(n -> n.costoTotal));
@@ -32,7 +34,7 @@ public class PuzzleSolver {
             Nodo actual = abierta.poll();
 
             if (Arrays.deepEquals(actual.estado, estadoMeta)) {
-                mostrarSolucion(actual);
+                mostrarSolucion(actual); // Se encontró la solución
                 return;
             }
 
@@ -50,18 +52,22 @@ public class PuzzleSolver {
         System.out.println("No se encontró solución.");
     }
 
+    // Devuelve una copia del estado inicial para evitar modificaciones externas
     public int[][] getEstadoInicialClonado() {
         return copiarMatriz(estadoInicial);
     }
 
+    // Establece el estado inicial del tablero
     public void setEstadoInicial(int[][] estado) {
         this.estadoInicial = copiarMatriz(estado);
     }
 
+    // Establece el estado objetivo/meta del tablero
     public void setEstadoMeta(int[][] meta) {
         this.estadoMeta = copiarMatriz(meta);
     }
 
+    // Resuelve el puzzle de forma automática mostrando la animación en la interfaz gráfica
     public void resolverAutomaticamente(Puzzle puzzle, JPanel panel) {
         Nodo inicio = new Nodo(copiarMatriz(puzzle.getTablero()), null, 0, calcularHeuristica(puzzle.getTablero()));
         PriorityQueue<Nodo> abierta = new PriorityQueue<>(Comparator.comparingInt(n -> n.costoTotal));
@@ -71,7 +77,7 @@ public class PuzzleSolver {
         while (!abierta.isEmpty()) {
             Nodo actual = abierta.poll();
             if (Arrays.deepEquals(actual.estado, estadoMeta)) {
-                animarSolucion(actual, puzzle, panel);
+                animarSolucion(actual, puzzle, panel); // Inicia la animación paso a paso
                 return;
             }
 
@@ -89,38 +95,39 @@ public class PuzzleSolver {
         JOptionPane.showMessageDialog(panel, "No se encontró solución.");
     }
 
-private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
-    List<Nodo> camino = new ArrayList<>();
-    while (nodo != null) {
-        camino.add(nodo);
-        nodo = nodo.padre;
-    }
-    Collections.reverse(camino);
+    // Anima paso a paso el camino desde el estado inicial hasta el objetivo en la GUI
+    private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
+        List<Nodo> camino = new ArrayList<>();
+        while (nodo != null) {
+            camino.add(nodo);
+            nodo = nodo.padre;
+        }
+        Collections.reverse(camino); // Ordenar de inicio a meta
 
-    Timer timer = new Timer(500, new AbstractAction() {
-        int i = 0;
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (i < camino.size()) {
-                puzzle.setTablero(camino.get(i++).estado);
-                panel.repaint();
-            } else {
-                ((Timer) e.getSource()).stop();
-                JOptionPane.showMessageDialog(panel, "🎉 Puzzle resuelto automáticamente.");
+        Timer timer = new Timer(500, new AbstractAction() {
+            int i = 0;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (i < camino.size()) {
+                    puzzle.setTablero(camino.get(i++).estado);
+                    panel.repaint();
+                } else {
+                    ((Timer) e.getSource()).stop();
+                    JOptionPane.showMessageDialog(panel, "🎉 Puzzle resuelto automáticamente.");
 
-                // Pedir alias y guardar puntuación
-                String alias = JOptionPane.showInputDialog(panel, "Introduce tu alias:");
-                if (alias != null && !alias.trim().isEmpty()) {
-                    ScoreManager scoreManager = new ScoreManager("data/scores.txt");
-                    scoreManager.registrarPuntuacion(alias.trim(), 50); // Puntaje para resolución automática
+                    // Solicita el nombre del jugador y registra la puntuación
+                    String alias = JOptionPane.showInputDialog(panel, "Introduce tu alias:");
+                    if (alias != null && !alias.trim().isEmpty()) {
+                        ScoreManager scoreManager = new ScoreManager("data/scores.txt");
+                        scoreManager.registrarPuntuacion(alias.trim(), 50); // Puntos para solución automática
+                    }
                 }
             }
-        }
-    });
-    timer.start();
-}
+        });
+        timer.start();
+    }
 
-
+    // Imprime la solución paso a paso en consola (modo texto)
     private void mostrarSolucion(Nodo nodo) {
         List<Nodo> camino = new ArrayList<>();
         while (nodo != null) {
@@ -136,9 +143,10 @@ private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
         }
     }
 
+    // Genera los estados sucesores desde un estado actual moviendo la ficha vacía
     private List<Nodo> generarSucesores(Nodo nodo) {
         List<Nodo> sucesores = new ArrayList<>();
-        int[][] dir = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        int[][] dir = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Movimientos posibles: arriba, abajo, izq, der
         int[] vacia = encontrarPosicionVacia(nodo.estado);
         int fila = vacia[0], col = vacia[1];
 
@@ -149,7 +157,7 @@ private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
             if (nf >= 0 && nf < TAM && nc >= 0 && nc < TAM) {
                 int[][] nuevoEstado = copiarMatriz(nodo.estado);
                 nuevoEstado[fila][col] = nuevoEstado[nf][nc];
-                nuevoEstado[nf][nc] = 0;
+                nuevoEstado[nf][nc] = 0; // Mueve la ficha
 
                 int nuevoCosto = nodo.costo + 1;
                 int heuristica = calcularHeuristica(nuevoEstado);
@@ -160,6 +168,7 @@ private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
         return sucesores;
     }
 
+    // Lee y valida una matriz de 3x3 desde entrada de texto del usuario
     private int[][] leerEstadoDesdeUsuario(Scanner scanner) {
         int[][] estado = new int[TAM][TAM];
         while (true) {
@@ -184,6 +193,7 @@ private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
         return estado;
     }
 
+    // Encuentra la posición actual del valor 0 (espacio vacío) en el tablero
     private int[] encontrarPosicionVacia(int[][] estado) {
         for (int i = 0; i < TAM; i++)
             for (int j = 0; j < TAM; j++)
@@ -192,6 +202,7 @@ private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
         return null;
     }
 
+    // Crea una copia profunda de una matriz 3x3
     private int[][] copiarMatriz(int[][] original) {
         int[][] copia = new int[TAM][TAM];
         for (int i = 0; i < TAM; i++)
@@ -199,6 +210,7 @@ private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
         return copia;
     }
 
+    // Calcula la heurística de Manhattan para estimar la distancia al estado meta
     private int calcularHeuristica(int[][] estado) {
         int h = 0;
         for (int i = 0; i < TAM; i++) {
@@ -214,6 +226,7 @@ private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
         return h;
     }
 
+    // Imprime visualmente el estado actual del tablero en consola
     private void imprimirEstado(int[][] estado) {
         System.out.println("-------------");
         for (int i = 0; i < TAM; i++) {
@@ -229,11 +242,12 @@ private void animarSolucion(Nodo nodo, Puzzle puzzle, JPanel panel) {
         System.out.println("-------------\n");
     }
 
+    // Clase interna que representa un nodo del árbol de búsqueda A*
     private class Nodo {
-        int[][] estado;
-        Nodo padre;
-        int costo;
-        int costoTotal;
+        int[][] estado;     // Estado actual del tablero
+        Nodo padre;         // Nodo anterior en el camino
+        int costo;          // Costo desde el inicio hasta este nodo
+        int costoTotal;     // Costo total estimado (g + h)
 
         Nodo(int[][] estado, Nodo padre, int costo, int heuristica) {
             this.estado = estado;
