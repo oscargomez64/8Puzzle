@@ -20,13 +20,16 @@ public class PuzzleGUI extends JPanel {
         // Botón: Sugerencia de movimiento usando inteligencia artificial (A*)
         JButton btnSugerencia = new JButton("Sugerencia");
         btnSugerencia.setBounds(10, TAM * TILE_SIZE + 5, 120, 30);
-        btnSugerencia.addActionListener(_ -> {
-            MoveSuggester sugeridor = new MoveSuggester(); // Instancia del sugeridor
-            String mov = sugeridor.sugerirMovimiento(puzzle.getTablero());
-            if (mov != null) {
-                JOptionPane.showMessageDialog(this, "➡️ Sugerencia: mueve " + mov);
-            } else {
-                JOptionPane.showMessageDialog(this, "No se puede sugerir un movimiento.");
+        btnSugerencia.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MoveSuggester sugeridor = new MoveSuggester(); // Instancia del sugeridor
+                String mov = sugeridor.sugerirMovimiento(puzzle.getTablero());
+                if (mov != null) {
+                    JOptionPane.showMessageDialog(PuzzleGUI.this, "➡️ Sugerencia: mueve " + mov);
+                } else {
+                    JOptionPane.showMessageDialog(PuzzleGUI.this, "No se puede sugerir un movimiento.");
+                }
             }
         });
         this.add(btnSugerencia);
@@ -34,11 +37,14 @@ public class PuzzleGUI extends JPanel {
         // Botón: Resolver automáticamente el puzzle paso a paso
         JButton btnResolver = new JButton("Resolver");
         btnResolver.setBounds(140, TAM * TILE_SIZE + 5, 120, 30);
-        btnResolver.addActionListener(_ -> {
-            PuzzleSolver solver = new PuzzleSolver();
-            solver.setEstadoInicial(puzzle.getTablero());
-            solver.setEstadoMeta(puzzle.generarMeta()); // Estado meta por defecto
-            solver.resolverAutomaticamente(puzzle, this); // Se pasa el tablero y el panel gráfico
+        btnResolver.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                PuzzleSolver solver = new PuzzleSolver();
+                solver.setEstadoInicial(puzzle.getTablero());
+                solver.setEstadoMeta(puzzle.generarMeta()); // Estado meta por defecto
+                solver.resolverAutomaticamente(puzzle, PuzzleGUI.this); // Se pasa el tablero y el panel gráfico
+            }
         });
         this.add(btnResolver);
 
